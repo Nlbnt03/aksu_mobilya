@@ -36,6 +36,7 @@ class _MenuState extends State<Menu> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         title: const Text(
           "Menü",
           style: TextStyle(fontWeight: FontWeight.bold),

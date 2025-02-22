@@ -39,49 +39,60 @@ class _PasswordState extends State<Password> {
     if (event is KeyDownEvent) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const FirsPage()), // Şifre ekranı
+        MaterialPageRoute(builder: (context) => FirstPage()), // Şifre ekranı
       );
     }
+  }
+
+  void _handleTap() {
+    // Kullanıcı fare ile ekrana tıkladığında şifre giriş ekranına yönlendir
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FirstPage()), // Şifre ekranı
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: KeyboardListener(
-        focusNode: _focusNode, // Klavye girişlerini dinle
-        onKeyEvent: _handleKeyPress, // Tuşa basıldığında çalışacak fonksiyon
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Arka plan resmi
-            Positioned.fill(
-              child: Image.asset(
-                "images/harmony.png",
-                fit: BoxFit.cover,
-              ),
-            ),
-            // Blur efekti (daha bulanık)
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0), // BLUR artırıldı
-                child: Container(
-                  color: Colors.black.withOpacity(0.3), // Arka planı koyulaştır
+      body: GestureDetector(
+        onTap: _handleTap, // Fare tıklamalarını dinle
+        child: KeyboardListener(
+          focusNode: _focusNode, // Klavye girişlerini dinle
+          onKeyEvent: _handleKeyPress, // Tuşa basıldığında çalışacak fonksiyon
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Arka plan resmi
+              Positioned.fill(
+                child: Image.asset(
+                  "images/harmony.png",
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-            // Saat ve tarih
-            Positioned(
-              bottom: 50,
-              child: Text(
-                _currentTime,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              // Blur efekti (daha bulanık)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0), // BLUR artırıldı
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3), // Arka planı koyulaştır
+                  ),
                 ),
               ),
-            ),
-          ],
+              // Saat ve tarih
+              Positioned(
+                bottom: 50,
+                child: Text(
+                  _currentTime,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

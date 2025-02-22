@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(runner LANGUAGES CXX)
+project(AKSU_Mobilya LANGUAGES CXX)
 
 # Define the application target.
 add_executable(${BINARY_NAME} WIN32

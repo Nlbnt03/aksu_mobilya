@@ -85,34 +85,85 @@ class _FisOlusturState extends State<FisOlustur> {
     final robotoFont = await rootBundle.load("fonts/roboto.ttf");
     final roboto = pw.Font.ttf(robotoFont);
 
+    // Logoyu yükleme
+    final logoImage = await rootBundle.load("images/AKSU.png");
+    final logo = pw.MemoryImage(logoImage.buffer.asUint8List());
+
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text("AKSU Mobilya",
-                  style: pw.TextStyle(font: roboto, fontSize: 20, fontWeight: pw.FontWeight.bold)),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.start,
+                children: [
+                  pw.Image(logo, width: 150, height: 150), // Logoyu ekleme
+                  pw.SizedBox(width: 20),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text("AKSU Mobilya & Döşeme",
+                          style: pw.TextStyle(font: roboto, fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 5),
+                      pw.Text("Adres:Lalapaşa Mahallesi Piri Reis Sokak Binton Apartmanı Altı",
+                          style: pw.TextStyle(font: roboto, fontSize: 12)),
+                      pw.Text("Fatih Aksu: 0536 760 8558", style: pw.TextStyle(font: roboto, fontSize: 12)),
+                      pw.Text("Telefon: 0442 235 6376", style: pw.TextStyle(font: roboto, fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
               pw.SizedBox(height: 20),
-              pw.Text("İş detayları", style: pw.TextStyle(font: roboto, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.Padding(
+                child: pw.Text("İş Detayları", style: pw.TextStyle(font: roboto, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                padding: pw.EdgeInsets.only(left: 10)
+              ),
               pw.SizedBox(height: 10),
-              _buildTextRow("Ad", updatedProcess.ad, roboto),
-              _buildTextRow("Soyad", updatedProcess.soyad, roboto),
-              _buildTextRow("Telefon", updatedProcess.telefon, roboto),
-              _buildTextRow("Adres", updatedProcess.adres, roboto),
-              _buildTextRow("Yapılan İş", updatedProcess.isDetay, roboto),
-              _buildTextRow("Kullanılan Malzemeler", updatedProcess.kullanilan, roboto),
-              _buildTextRow("Teslim Tarihi", updatedProcess.teslimTarihi, roboto),
-              _buildTextRow("Kayıt Yapan", updatedProcess.kayitYapan, roboto),
-              _buildTextRow("Fiyat", "${updatedProcess.fiyat.toStringAsFixed(2)} TL", roboto),
+              pw.Padding(
+                child:_buildTextRow("Ad", updatedProcess.ad, roboto),
+                padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child:_buildTextRow("Soyad", updatedProcess.soyad, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child:_buildTextRow("Telefon", updatedProcess.telefon, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child:_buildTextRow("Yapılan İş", updatedProcess.isDetay, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child:_buildTextRow("Kullanılan Malzemeler", updatedProcess.kullanilan, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child:  _buildTextRow("Teslim Tarihi", updatedProcess.teslimTarihi, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child: _buildTextRow("Kayıt Yapan", updatedProcess.kayitYapan, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child: _buildTextRow("Fiyat", "${updatedProcess.fiyat.toStringAsFixed(2)} TL".toUpperCase(), roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
+              pw.Padding(
+                  child: // ✅ Ödeme yöntemi ekledik
+                  _buildTextRow("Ödeme Yöntemi", updatedProcess.odemeYontemi, roboto),
+                  padding: pw.EdgeInsets.only(left: 10)
+              ),
 
-              // ✅ Ödeme yöntemi ekledik
-              _buildTextRow("Ödeme Yöntemi", updatedProcess.odemeYontemi, roboto),
-
-              // ✅ Taksit bilgisi yalnızca ödeme yöntemi "Kredi" ise eklenecek
               if (updatedProcess.odemeYontemi == "Kredi")
-                _buildTextRow("Taksit Sayısı", updatedProcess.taksitSayisi?.toString() ?? "Belirtilmedi", roboto),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 10),
+                  child: _buildTextRow("Taksit Sayısı", updatedProcess.taksitSayisi?.toString() ?? "Belirtilmedi", roboto),
+                ),
 
               pw.SizedBox(height: 20),
               pw.Text(
@@ -129,14 +180,22 @@ class _FisOlusturState extends State<FisOlustur> {
     );
 
     // PDF'i geçici bir dosyaya kaydet
-    final output = await getTemporaryDirectory();
+    final output = await getApplicationDocumentsDirectory(); // Daha güvenilir dizin
     final file = File('${output.path}/fis.pdf');
     await file.writeAsBytes(await pdf.save());
 
-    // PDF dosyasını aç
-    await OpenFile.open(file.path);
+    try {
+      await OpenFile.open(file.path);
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("PDF Açılamadı"),
+          content: Text("Lütfen bir PDF okuyucu yükleyin."),
+        ),
+      );
+    }
   }
-
   pw.Widget _buildTextRow(String label, String value, pw.Font font) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 5),
@@ -150,10 +209,6 @@ class _FisOlusturState extends State<FisOlustur> {
       ),
     );
   }
-
-
-  // PDF'deki imza bölümü
-  // PDF'deki imza bölümü
   pw.Widget _buildSignatureSection(pw.Font font) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -215,7 +270,7 @@ class _FisOlusturState extends State<FisOlustur> {
               {'label': 'Kullanılan Malzemeler', 'value': updatedProcess.kullanilan, 'onUpdate': (val) => updatedProcess.kullanilan = val},
               {'label': 'Teslim Tarihi', 'value': updatedProcess.teslimTarihi, 'onUpdate': (val) => updatedProcess.teslimTarihi = val},
               {'label': 'Kayıt Yapan', 'value': updatedProcess.kayitYapan, 'onUpdate': (val) => updatedProcess.kayitYapan = val},
-              {'label': 'Fiyat', 'value': "${updatedProcess.fiyat.toStringAsFixed(2)} TL", 'onUpdate': (val) => updatedProcess.fiyat = double.tryParse(val) ?? 0.0},
+              {'label': 'Fiyat', 'value': "${updatedProcess.fiyat.toStringAsFixed(2)} TL".toUpperCase(), 'onUpdate': (val) => updatedProcess.fiyat = double.tryParse(val) ?? 0.0},
 
               // ✅ **Ödeme yöntemi ve taksit detaylarını ekledik**
               {'label': 'Ödeme Yöntemi', 'value': updatedProcess.odemeYontemi, 'onUpdate': (val) => updatedProcess.odemeYontemi = val},

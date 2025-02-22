@@ -5,14 +5,14 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobilya/menu.dart';
 
-class FirsPage extends StatefulWidget {
-  const FirsPage({super.key});
+class FirstPage extends StatefulWidget {
+  const FirstPage({super.key});
 
   @override
-  State<FirsPage> createState() => _FirsPageState();
+  State<FirstPage> createState() => _FirstPageState();
 }
 
-class _FirsPageState extends State<FirsPage> {
+class _FirstPageState extends State<FirstPage> {
   String _currentTime = "";
   final TextEditingController _passwordController = TextEditingController();
   String _savedPassword = "123456"; // Varsayılan şifre
@@ -118,6 +118,7 @@ class _FirsPageState extends State<FirsPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        onSubmitted: (value) => _checkPassword(), // Enter tuşuna basıldığında çalışacak fonksiyon
                       ),
                       const SizedBox(height: 15),
                       // Giriş Butonu

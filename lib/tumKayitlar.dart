@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,7 @@ import 'package:mobilya/processDetail.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 
 class Tumkayitlar extends StatefulWidget {
   const Tumkayitlar({Key? key}) : super(key: key);
@@ -107,6 +109,87 @@ class _TumkayitlarState extends State<Tumkayitlar> {
     );
   }
 
+  Future<void> _exportToCSV() async {
+    try {
+      final db = await DatabaseHelper.instance.database;
+      final processes = await Process.getAllOrderedByDate(db);
+
+      List<List<dynamic>> rows = [];
+      rows.add([
+        "ID",
+        "AD",
+        "SOYAD",
+        "TELEFON",
+        "ADRES",
+        "İŞ DETAY",
+        "KULLANILAN",
+        "TESLİM TARİHİ",
+        "ÖDEME YÖNTEMİ",
+        "TAKSİT VAR MI",
+        "TAKSİT SAYISI",
+        "KAYIT YAPAN",
+        "KAYIT TARİHİ",
+        "FİYAT"
+      ]);
+
+      for (var process in processes) {
+        rows.add([
+          process.id,
+          process.ad.toUpperCase(),
+          process.soyad.toUpperCase(),
+          process.telefon.toUpperCase(),
+          process.adres.toUpperCase(),
+          process.isDetay.toUpperCase(),
+          process.kullanilan.toUpperCase(),
+          process.teslimTarihi.toUpperCase(),
+          process.odemeYontemi.toUpperCase(),
+          process.taksitVarMi.toString().toUpperCase(),
+          process.taksitSayisi?.toString().toUpperCase() ?? '',
+          process.kayitYapan.toUpperCase(),
+          process.kayitTarihi,
+          process.fiyat.toString().toUpperCase()
+        ]);
+      }
+
+      String csv = const ListToCsvConverter().convert(rows);
+
+      // UTF-8 BOM ekleyerek dosyanın doğru şekilde kodlanmasını sağla
+      List<int> csvBytes = utf8.encode(csv);
+      List<int> bom = [0xEF, 0xBB, 0xBF];
+      csvBytes = bom + csvBytes;
+
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'CSV dosyasını kaydet',
+        fileName: 'veritabani_yedegi.csv',
+      );
+
+      if (outputFile != null) {
+        File file = File(outputFile);
+        await file.writeAsBytes(csvBytes);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green[700],
+            content: const Text(
+              "CSV dosyası başarıyla kaydedildi!",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("CSV dışa aktarma hatası: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red[700],
+          content: const Text(
+            "CSV dosyası kaydedilirken bir hata oluştu!",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,6 +204,12 @@ class _TumkayitlarState extends State<Tumkayitlar> {
                 context, MaterialPageRoute(builder: (context) => const Menu()));
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download, color: Colors.white),
+            onPressed: _exportToCSV,
+          ),
+        ],
       ),
       body: Column(
         children: [

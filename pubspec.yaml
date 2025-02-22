@@ -39,7 +39,8 @@ dependencies:
   open_file: ^3.2.1
   csv: ^6.0.0
   file_picker: ^9.0.0
-
+  sqflite_common_ffi: ^2.3.5
+  sqlite3_flutter_libs: ^0.5.20
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -72,6 +73,7 @@ flutter:
   assets:
     - images/harmony.png
     - images/menu.jpg
+    - images/AKSU.png
     - fonts/roboto.ttf
   #   - images/a_dot_ham.jpeg
 
